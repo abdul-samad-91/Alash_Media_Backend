@@ -1,0 +1,550 @@
+{
+  "info": {
+    "name": "Alash Media Backend API",
+    "description": "Complete API collection for Alash Media",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@alashmedia.com\",\n  \"password\": \"password123\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/register",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@alashmedia.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/login",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/profile",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "auth", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/categories",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Technology\",\n  \"description\": \"Tech related articles\",\n  \"parentCategory\": null\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/categories",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/categories/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "categories", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Tech\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/categories/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "categories", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/categories/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "categories", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authors",
+      "item": [
+        {
+          "name": "Get All Authors",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/authors?page=1&limit=10",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "authors"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Author",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"photo\": \"https://example.com/john.jpg\",\n  \"shortBio\": \"Renowned author and historian\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/authors",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "authors"]
+            }
+          }
+        },
+        {
+          "name": "Get Author by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/authors/:id?page=1&limit=5",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "authors", ":id"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Author",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"shortBio\": \"Updated bio\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/authors/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "authors", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Author",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/authors/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "authors", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blogs",
+      "item": [
+        {
+          "name": "Get All Blogs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/blogs?page=1&limit=10&status=published",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "blogs"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "published" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Blog",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Amazing Travel Blog\",\n  \"shortDescription\": \"Explore the world with us\",\n  \"content\": \"Full blog content goes here...\",\n  \"featuredImage\": \"https://example.com/image.jpg\",\n  \"author\": \"{{AUTHOR_ID}}\",\n  \"category\": \"{{CATEGORY_ID}}\",\n  \"status\": \"published\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/blogs",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "blogs"]
+            }
+          }
+        },
+        {
+          "name": "Get Blog by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/blogs/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "blogs", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Get Blog by Slug",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/blogs/slug/amazing-travel-blog",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "blogs", "slug", "amazing-travel-blog"]
+            }
+          }
+        },
+        {
+          "name": "Update Blog",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Blog Title\",\n  \"status\": \"published\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/blogs/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "blogs", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Blog",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/blogs/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "blogs", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Banners",
+      "item": [
+        {
+          "name": "Get All Banners",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/banners?page=1&limit=10",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "banners"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Banner",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Spring Sale 2024\",\n  \"description\": \"Get 50% off on all products\",\n  \"image\": \"https://example.com/banner.jpg\",\n  \"link\": \"https://example.com/sale\",\n  \"position\": 1\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/banners",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "banners"]
+            }
+          }
+        },
+        {
+          "name": "Update Banner",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Banner Title\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/banners/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "banners", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Banner",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/banners/:id",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "banners", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Votes",
+      "item": [
+        {
+          "name": "Get All Votes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/votes?page=1&limit=10&activeOnly=true",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "votes"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "activeOnly", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Vote",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"What's your favorite programming language?\",\n  \"description\": \"Vote for your preferred language\",\n  \"options\": [\"JavaScript\", \"Python\", \"Java\", \"C++\"]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/votes",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "votes"]
+            }
+          }
+        },
+        {
+          "name": "Cast Vote",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"optionIndex\": 0\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/votes/:id/cast",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "votes", ":id", "cast"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Galleries",
+      "item": [
+        {
+          "name": "Get All Galleries",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/galleries?page=1&limit=10&type=photo",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "galleries"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "type", "value": "photo" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Gallery",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Summer 2024 Photos\",\n  \"description\": \"Beautiful moments from summer\",\n  \"type\": \"photo\",\n  \"category\": \"events\",\n  \"items\": []\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/galleries",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "galleries"]
+            }
+          }
+        },
+        {
+          "name": "Add Item to Gallery",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Beach Sunset\",\n  \"url\": \"https://example.com/beach.jpg\",\n  \"thumbnail\": \"https://example.com/beach-thumb.jpg\",\n  \"description\": \"Beautiful beach sunset\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/galleries/:id/items",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "galleries", ":id", "items"]
+            }
+          }
+        },
+        {
+          "name": "Remove Item from Gallery",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{TOKEN}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/galleries/:id/items/:itemId",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "galleries", ":id", "items", ":itemId"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "TOKEN",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "AUTHOR_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "CATEGORY_ID",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
