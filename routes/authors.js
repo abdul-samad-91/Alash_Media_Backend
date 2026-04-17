@@ -13,8 +13,8 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getAllAuthors);
-router.get('/:id', getAuthorById);
 router.get('/slug/:slug', getAuthorBySlug);
+router.get('/:id', getAuthorById);
 
 // Admin routes
 router.post('/', protect, authorize('admin'), createAuthor);

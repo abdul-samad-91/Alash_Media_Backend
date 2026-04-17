@@ -13,6 +13,7 @@ import bannerRoutes from './routes/banners.js';
 import voteRoutes from './routes/votes.js';
 import galleryRoutes from './routes/galleries.js';
 import uploadRoutes from './routes/upload.js';
+import dashboardRoutes from './routes/dashboard.js';
 
 // Load environment variables
 dotenv.config();
@@ -46,6 +47,7 @@ app.use('/api/banners', bannerRoutes);
 app.use('/api/votes', voteRoutes);
 app.use('/api/galleries', galleryRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // 404 handler
 app.use(notFound);

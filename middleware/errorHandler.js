@@ -1,6 +1,31 @@
 export const errorHandler = (err, req, res, next) => {
   console.error(err);
 
+  // Prisma validation errors
+  if (err.name === 'PrismaClientValidationError') {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid request payload',
+    });
+  }
+
+  // Prisma unique constraint
+  if (err.code === 'P2002') {
+    const fields = err.meta?.target || [];
+    return res.status(400).json({
+      success: false,
+      message: `${fields.join(', ') || 'Field'} already exists`,
+    });
+  }
+
+  // Prisma not found
+  if (err.code === 'P2025') {
+    return res.status(404).json({
+      success: false,
+      message: 'Resource not found',
+    });
+  }
+
   // Mongoose validation error
   if (err.name === 'ValidationError') {
     const errors = Object.values(err.errors).map((e) => e.message);

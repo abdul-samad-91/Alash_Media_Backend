@@ -10,6 +10,7 @@ const formatBlogResponse = (blog) => {
   return {
     id: blog.id,
     title: blog.title,
+    contentType: blog.contentType || 'blog',
     subtitle: blog.subtitle || '',
     author: blog.author?.name || '',
     authorId: blog.author?.id,
@@ -43,10 +44,16 @@ const formatBlogResponse = (blog) => {
   };
 };
 
+const normalizeContentType = (value) => {
+  const normalized = String(value || 'blog').toLowerCase();
+  return normalized === 'news' ? 'news' : 'blog';
+};
+
 export const createBlog = async (req, res, next) => {
   try {
     const {
       title,
+      contentType,
       subtitle,
       shortDescription,
       content,
@@ -82,6 +89,7 @@ export const createBlog = async (req, res, next) => {
         title,
         subtitle,
         slug,
+        contentType: normalizeContentType(contentType),
         shortDescription,
         content,
         featuredImage,
@@ -133,14 +141,30 @@ export const createBlog = async (req, res, next) => {
 
 export const getAllBlogs = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, status, category, author, search } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      status,
+      type,
+      contentType,
+      category,
+      author,
+      search,
+      activeOnly = false,
+      sort = 'createdAt',
+      order = 'desc',
+    } = req.query;
 
     const where = {};
     if (status) where.status = status;
+    if (type || contentType) where.contentType = normalizeContentType(contentType || type);
     if (category) where.categoryId = parseInt(category);
     if (author) where.authorId = parseInt(author);
+    if (activeOnly === 'true') where.isActive = true;
 
-    const startIndex = (page - 1) * limit;
+    const pageNumber = parseInt(page);
+    const pageLimit = parseInt(limit);
+    const startIndex = (pageNumber - 1) * pageLimit;
 
     // Handle search - for MySQL, we need to use a different approach
     if (search) {
@@ -148,6 +172,16 @@ export const getAllBlogs = async (req, res, next) => {
         { title: { contains: search } },
         { content: { contains: search } },
       ];
+    }
+
+    let orderBy = { createdAt: 'desc' };
+    const sortOrder = order === 'asc' ? 'asc' : 'desc';
+    if (sort === 'publishedDate') {
+      orderBy = { publishedDate: sortOrder };
+    } else if (sort === 'views') {
+      orderBy = { views: sortOrder };
+    } else if (sort === 'title') {
+      orderBy = { title: sortOrder };
     }
 
     const total = await prisma.blog.count({ where });
@@ -161,8 +195,8 @@ export const getAllBlogs = async (req, res, next) => {
         sections: true,
       },
       skip: startIndex,
-      take: parseInt(limit),
-      orderBy: { createdAt: 'desc' },
+      take: pageLimit,
+      orderBy,
     });
 
     res.status(200).json({
@@ -170,9 +204,9 @@ export const getAllBlogs = async (req, res, next) => {
       data: blogs.map(formatBlogResponse),
       pagination: {
         total,
-        pages: Math.ceil(total / limit),
-        currentPage: parseInt(page),
-        limit: parseInt(limit),
+        pages: Math.ceil(total / pageLimit),
+        currentPage: pageNumber,
+        limit: pageLimit,
       },
     });
   } catch (error) {
@@ -183,10 +217,17 @@ export const getAllBlogs = async (req, res, next) => {
 export const getBlogById = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const blogId = parseInt(id);
 
-    const blog = await prisma.blog.update({
-      where: { id: parseInt(id) },
-      data: { views: { increment: 1 } },
+    if (Number.isNaN(blogId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid blog id',
+      });
+    }
+
+    const blog = await prisma.blog.findUnique({
+      where: { id: blogId },
       include: {
         author: true,
         category: true,
@@ -203,9 +244,14 @@ export const getBlogById = async (req, res, next) => {
       });
     }
 
+    await prisma.blog.update({
+      where: { id: blogId },
+      data: { views: { increment: 1 } },
+    });
+
     res.status(200).json({
       success: true,
-      data: formatBlogResponse(blog),
+      data: formatBlogResponse({ ...blog, views: blog.views + 1 }),
     });
   } catch (error) {
     next(error);
@@ -216,9 +262,8 @@ export const getBlogBySlug = async (req, res, next) => {
   try {
     const { slug } = req.params;
 
-    const blog = await prisma.blog.update({
+    const blog = await prisma.blog.findUnique({
       where: { slug },
-      data: { views: { increment: 1 } },
       include: {
         author: true,
         category: true,
@@ -235,9 +280,14 @@ export const getBlogBySlug = async (req, res, next) => {
       });
     }
 
+    await prisma.blog.update({
+      where: { slug },
+      data: { views: { increment: 1 } },
+    });
+
     res.status(200).json({
       success: true,
-      data: formatBlogResponse(blog),
+      data: formatBlogResponse({ ...blog, views: blog.views + 1 }),
     });
   } catch (error) {
     next(error);
@@ -249,6 +299,7 @@ export const updateBlog = async (req, res, next) => {
     const { id } = req.params;
     const {
       title,
+      contentType,
       subtitle,
       shortDescription,
       content,
@@ -311,6 +362,7 @@ export const updateBlog = async (req, res, next) => {
     // Update blog
     const updateData = {
       ...(title && { title, slug: generateSlug(title) }),
+      ...(contentType && { contentType: normalizeContentType(contentType) }),
       ...(subtitle !== undefined && { subtitle }),
       ...(shortDescription && { shortDescription }),
       ...(content && { content }),

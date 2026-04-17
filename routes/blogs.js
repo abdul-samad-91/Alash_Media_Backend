@@ -13,8 +13,8 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getAllBlogs);
-router.get('/:id', getBlogById);
 router.get('/slug/:slug', getBlogBySlug);
+router.get('/:id', getBlogById);
 
 // Admin routes
 router.post('/', protect, authorize('admin', 'editor'), createBlog);

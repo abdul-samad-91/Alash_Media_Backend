@@ -44,19 +44,22 @@ export const createGallery = async (req, res, next) => {
 
 export const getAllGalleries = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, type, category } = req.query;
+    const { page = 1, limit = 10, type, category, activeOnly = false } = req.query;
 
-    let where = {};
+    const where = {};
     if (type) where.type = type;
     if (category) where.category = category;
+    if (activeOnly === 'true') where.isActive = true;
 
-    const startIndex = (page - 1) * limit;
+    const pageNumber = parseInt(page);
+    const pageLimit = parseInt(limit);
+    const startIndex = (pageNumber - 1) * pageLimit;
 
     const total = await prisma.gallery.count({ where });
     const galleries = await prisma.gallery.findMany({
       where,
       skip: startIndex,
-      take: parseInt(limit),
+      take: pageLimit,
       orderBy: { createdAt: 'desc' },
       include: {
         items: {
@@ -70,9 +73,9 @@ export const getAllGalleries = async (req, res, next) => {
       data: galleries,
       pagination: {
         total,
-        pages: Math.ceil(total / limit),
-        currentPage: parseInt(page),
-        limit: parseInt(limit),
+        pages: Math.ceil(total / pageLimit),
+        currentPage: pageNumber,
+        limit: pageLimit,
       },
     });
   } catch (error) {
@@ -112,7 +115,14 @@ export const getGalleryById = async (req, res, next) => {
 export const updateGallery = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, description, items, category, isActive } = req.body;
+    const { title, description, items, category, isActive, type } = req.body;
+
+    if (type && !['photo', 'video'].includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Type must be either "photo" or "video"',
+      });
+    }
 
     let gallery = await prisma.gallery.findUnique({
       where: { id: parseInt(id) },
@@ -135,6 +145,7 @@ export const updateGallery = async (req, res, next) => {
     const updateData = {
       ...(title && { title }),
       ...(description !== undefined && { description }),
+      ...(type && { type }),
       ...(category && { category }),
       ...(isActive !== undefined && { isActive }),
     };

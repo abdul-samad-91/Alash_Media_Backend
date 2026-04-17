@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-//   previewFeatures = ["fullTextIndex"]
+  previewFeatures = ["fullTextIndex"]
 }
 
 datasource db {
@@ -29,7 +29,7 @@ model Author {
   id       Int     @id @default(autoincrement())
   name     String
   slug     String  @unique
-  photo    String?
+  photo    String? @db.Text
   shortBio String
   isActive Boolean @default(true)
   createdAt DateTime @default(now())
@@ -63,12 +63,13 @@ model Blog {
   id               Int     @id @default(autoincrement())
   title            String
   slug             String  @unique
+  contentType      String  @default("blog") // blog, news
   subtitle         String?
   shortDescription String
   content          String  @db.LongText
   mainContentOne   String?
   mainContentTwo   String?
-  featuredImage    String
+  featuredImage    String  @db.Text
   imageCaption     String?
   status           String  @default("draft") // draft, published
   publishedDate    DateTime?

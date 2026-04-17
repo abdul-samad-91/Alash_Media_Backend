@@ -3,7 +3,7 @@ import { generateSlug } from '../utils/helpers.js';
 
 export const createCategory = async (req, res, next) => {
   try {
-    const { name, description, parentCategory } = req.body;
+    const { name, description, parentCategory, isActive } = req.body;
 
     const slug = generateSlug(name);
 
@@ -37,6 +37,7 @@ export const createCategory = async (req, res, next) => {
         slug,
         description,
         parentCategoryId: parentCategory ? parseInt(parentCategory) : null,
+        isActive: isActive !== undefined ? isActive : true,
       },
       include: {
         parentCategory: true,
@@ -55,9 +56,17 @@ export const createCategory = async (req, res, next) => {
 
 export const getAllCategories = async (req, res, next) => {
   try {
-    const { parentOnly = false } = req.query;
+    const { parentOnly = false, activeOnly = false } = req.query;
 
-    const where = parentOnly === 'true' ? { parentCategoryId: null } : {};
+    const where = {};
+
+    if (parentOnly === 'true') {
+      where.parentCategoryId = null;
+    }
+
+    if (activeOnly === 'true') {
+      where.isActive = true;
+    }
 
     const categories = await prisma.category.findMany({
       where,
@@ -114,7 +123,7 @@ export const getCategoryById = async (req, res, next) => {
 export const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, description, parentCategory } = req.body;
+    const { name, description, parentCategory, isActive } = req.body;
 
     let category = await prisma.category.findUnique({
       where: { id: parseInt(id) },
@@ -147,6 +156,13 @@ export const updateCategory = async (req, res, next) => {
 
     if (parentCategory !== undefined) {
       if (parentCategory) {
+        if (parseInt(parentCategory) === parseInt(id)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Category cannot be its own parent',
+          });
+        }
+
         const parent = await prisma.category.findUnique({
           where: { id: parseInt(parentCategory) },
         });
@@ -161,7 +177,8 @@ export const updateCategory = async (req, res, next) => {
 
     const updateData = {
       ...(name && { name, slug: generateSlug(name) }),
-      ...(description && { description }),
+      ...(description !== undefined && { description }),
+      ...(isActive !== undefined && { isActive }),
       ...(parentCategory !== undefined && {
         parentCategoryId: parentCategory ? parseInt(parentCategory) : null,
       }),

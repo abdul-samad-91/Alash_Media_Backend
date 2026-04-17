@@ -113,7 +113,7 @@ export const getVoteById = async (req, res, next) => {
 export const updateVote = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, description, image, isActive, endDate, isExpired } = req.body;
+    const { title, description, image, isActive, endDate, isExpired, options } = req.body;
 
     let vote = await prisma.vote.findUnique({
       where: { id: parseInt(id) },
@@ -134,6 +134,23 @@ export const updateVote = async (req, res, next) => {
       ...(endDate && { endDate: new Date(endDate) }),
       ...(isExpired !== undefined && { isExpired }),
     };
+
+    if (options !== undefined) {
+      if (!Array.isArray(options) || options.length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: 'Vote must have at least 2 options',
+        });
+      }
+
+      updateData.options = {
+        deleteMany: {},
+        create: options.map((opt) => ({
+          text: typeof opt === 'string' ? opt : opt.text,
+          votes: 0,
+        })),
+      };
+    }
 
     const updatedVote = await prisma.vote.update({
       where: { id: parseInt(id) },
