@@ -1,210 +1,192 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextIndex"]
 }
 
 datasource db {
   provider = "mysql"
-  url      =  env("DATABASE_URL")
-}
-
-model User {
-  id       Int     @id @default(autoincrement())
-  name     String
-  email    String  @unique
-  password String
-  role     String  @default("editor") // admin, editor
-  isActive Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  blogs   Blog[]
+  url      = env("DATABASE_URL")
 }
 
 model Author {
-  id       Int     @id @default(autoincrement())
-  name     String
-  slug     String  @unique
-  photo    String? @db.Text
-  shortBio String
-  isActive Boolean @default(true)
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  photo     String?
+  shortBio  String
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Relations
-  blogs Blog[]
+  blogs     Blog[]
 
   @@map("authors")
 }
 
 model Category {
-  id               Int     @id @default(autoincrement())
-  name             String  @unique
-  slug             String  @unique
+  id               String     @id @default(uuid())
+  name             String     @unique
+  slug             String     @unique
   description      String?
-  parentCategoryId Int?
-  isActive         Boolean @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  parentCategoryId String?
+  isActive         Boolean    @default(true)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  blogs            Blog[]
+  parentCategory   Category?  @relation("CategoryToParent", fields: [parentCategoryId], references: [id])
+  subCategories    Category[] @relation("CategoryToParent")
 
-  // Relations
-  parentCategory Category?  @relation("CategoryToParent", fields: [parentCategoryId], references: [id], onDelete: SetNull)
-  subCategories  Category[]  @relation("CategoryToParent")
-  blogs          Blog[]
-
+  @@index([parentCategoryId], map: "categories_parentCategoryId_fkey")
   @@map("categories")
 }
 
 model Blog {
-  id               Int     @id @default(autoincrement())
+  id               String             @id @default(uuid())
   title            String
-  slug             String  @unique
-  contentType      String  @default("blog") // blog, news
+  slug             String             @unique
   subtitle         String?
   shortDescription String
-  content          String  @db.LongText
+  content          String             @db.LongText
   mainContentOne   String?
   mainContentTwo   String?
-  featuredImage    String  @db.Text
+  featuredImage    String
   imageCaption     String?
-  status           String  @default("draft") // draft, published
+  status           String             @default("draft")
   publishedDate    DateTime?
-  views            Int     @default(0)
+  views            Int                @default(0)
   readTime         String?
-  isActive         Boolean @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  // Foreign Keys
-  authorId Int
-  categoryId Int
-  createdById Int?
-
-  // Relations
-  author        Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  createdBy     User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
-  
-  tags          BlogTag[]
-  contentBlocks BlogContentBlock[]
-  sections      BlogSection[]
+  isActive         Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  authorId         String
+  categoryId       String
+  createdById      String?
+  contentType      String             @default("blog") @db.VarChar(50)
+  contentBlocks    BlogContentBlock[]
+  sections         BlogSection[]
+  tags             BlogTag[]
+  author           Author             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category         Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdBy        user?              @relation(fields: [createdById], references: [id])
 
   @@index([slug])
   @@index([authorId])
   @@index([categoryId])
+  @@index([createdById], map: "blogs_createdById_fkey")
   @@fulltext([title, content])
   @@map("blogs")
 }
 
 model BlogTag {
-  id    Int    @id @default(autoincrement())
-  tag   String
-  blogId Int
+  id     String @id @default(uuid())
+  tag    String
+  blogId String
+  blog   Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade)
 
-  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
-
+  @@index([blogId], map: "blog_tags_blogId_fkey")
   @@map("blog_tags")
 }
 
 model BlogContentBlock {
-  id      Int    @id @default(autoincrement())
-  blockId Int
+  id      String  @id @default(uuid())
   heading String?
   text    String?
-  blogId  Int
+  blogId  String
+  blog    Blog    @relation(fields: [blogId], references: [id], onDelete: Cascade)
 
-  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
-
+  @@index([blogId], map: "blog_content_blocks_blogId_fkey")
   @@map("blog_content_blocks")
 }
 
 model BlogSection {
-  id      Int    @id @default(autoincrement())
-  sectionId Int
+  id      String  @id @default(uuid())
   heading String?
   text    String?
-  blogId  Int
+  blogId  String
+  blog    Blog    @relation(fields: [blogId], references: [id], onDelete: Cascade)
 
-  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
-
+  @@index([blogId], map: "blog_sections_blogId_fkey")
   @@map("blog_sections")
 }
 
 model Banner {
-  id        Int     @id @default(autoincrement())
-  title     String
+  id          String    @id @default(uuid())
+  title       String
   description String?
-  image     String
-  link      String?
-  position  Int     @default(0)
-  isActive  Boolean @default(true)
-  startDate DateTime @default(now())
-  endDate   DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  image       String
+  link        String?
+  position    Int       @default(0)
+  isActive    Boolean   @default(true)
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@map("banners")
 }
 
 model Gallery {
-  id        Int    @id @default(autoincrement())
-  title     String
+  id          String        @id @default(uuid())
+  title       String
   description String?
-  type      String // photo, video
-  category  String @default("general")
-  isActive  Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  items GalleryItem[]
+  type        String
+  category    String        @default("general")
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  items       GalleryItem[]
 
   @@map("galleries")
 }
 
 model GalleryItem {
-  id          Int    @id @default(autoincrement())
-  title       String?
-  url         String
-  thumbnail   String?
-  description String?
-  displayOrder Int   @default(0)
-  galleryId   Int
+  id           String  @id @default(uuid())
+  title        String?
+  url          String
+  thumbnail    String?
+  description  String?
+  displayOrder Int     @default(0)
+  galleryId    String
+  gallery      Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
 
-  gallery Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
-
+  @@index([galleryId], map: "gallery_items_galleryId_fkey")
   @@map("gallery_items")
 }
 
 model Vote {
-  id          Int    @id @default(autoincrement())
+  id          String       @id @default(uuid())
   title       String
   description String?
   image       String?
-  isActive    Boolean @default(true)
-  startDate   DateTime @default(now())
+  isActive    Boolean      @default(true)
+  startDate   DateTime     @default(now())
   endDate     DateTime?
-  isExpired   Boolean @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  options VoteOption[]
+  isExpired   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  options     VoteOption[]
 
   @@map("votes")
 }
 
 model VoteOption {
-  id     Int    @id @default(autoincrement())
+  id     String @id @default(uuid())
   text   String
   votes  Int    @default(0)
-  voteId Int
+  voteId String
+  vote   Vote   @relation(fields: [voteId], references: [id], onDelete: Cascade)
 
-  vote Vote @relation(fields: [voteId], references: [id], onDelete: Cascade)
-
+  @@index([voteId], map: "vote_options_voteId_fkey")
   @@map("vote_options")
+}
+
+model user {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique(map: "User_email_key")
+  password  String
+  role      String   @default("editor")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  blogs     Blog[]
 }

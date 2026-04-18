@@ -21,7 +21,7 @@ export const createCategory = async (req, res, next) => {
     // If parentCategory is provided, verify it exists
     if (parentCategory) {
       const parent = await prisma.category.findUnique({
-        where: { id: parseInt(parentCategory) },
+        where: { id: parentCategory },
       });
       if (!parent) {
         return res.status(400).json({
@@ -36,7 +36,7 @@ export const createCategory = async (req, res, next) => {
         name,
         slug,
         description,
-        parentCategoryId: parentCategory ? parseInt(parentCategory) : null,
+        parentCategoryId: parentCategory || null,
         isActive: isActive !== undefined ? isActive : true,
       },
       include: {
@@ -90,7 +90,7 @@ export const getCategoryById = async (req, res, next) => {
     const { id } = req.params;
 
     const category = await prisma.category.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
       include: {
         parentCategory: true,
       },
@@ -105,7 +105,7 @@ export const getCategoryById = async (req, res, next) => {
 
     // Get subcategories
     const subcategories = await prisma.category.findMany({
-      where: { parentCategoryId: parseInt(id) },
+      where: { parentCategoryId: id },
     });
 
     res.status(200).json({
@@ -126,7 +126,7 @@ export const updateCategory = async (req, res, next) => {
     const { name, description, parentCategory, isActive } = req.body;
 
     let category = await prisma.category.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!category) {
@@ -142,7 +142,7 @@ export const updateCategory = async (req, res, next) => {
         where: {
           slug: newSlug,
           NOT: {
-            id: parseInt(id),
+            id,
           },
         },
       });
@@ -156,7 +156,7 @@ export const updateCategory = async (req, res, next) => {
 
     if (parentCategory !== undefined) {
       if (parentCategory) {
-        if (parseInt(parentCategory) === parseInt(id)) {
+        if (parentCategory === id) {
           return res.status(400).json({
             success: false,
             message: 'Category cannot be its own parent',
@@ -164,7 +164,7 @@ export const updateCategory = async (req, res, next) => {
         }
 
         const parent = await prisma.category.findUnique({
-          where: { id: parseInt(parentCategory) },
+          where: { id: parentCategory },
         });
         if (!parent) {
           return res.status(400).json({
@@ -180,12 +180,12 @@ export const updateCategory = async (req, res, next) => {
       ...(description !== undefined && { description }),
       ...(isActive !== undefined && { isActive }),
       ...(parentCategory !== undefined && {
-        parentCategoryId: parentCategory ? parseInt(parentCategory) : null,
+        parentCategoryId: parentCategory || null,
       }),
     };
 
     const updatedCategory = await prisma.category.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: updateData,
       include: {
         parentCategory: true,
@@ -208,7 +208,7 @@ export const deleteCategory = async (req, res, next) => {
 
     // Check if category has subcategories
     const hasSubcategories = await prisma.category.findFirst({
-      where: { parentCategoryId: parseInt(id) },
+      where: { parentCategoryId: id },
     });
     if (hasSubcategories) {
       return res.status(400).json({
@@ -218,7 +218,7 @@ export const deleteCategory = async (req, res, next) => {
     }
 
     const category = await prisma.category.delete({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!category) {

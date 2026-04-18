@@ -88,7 +88,7 @@ export const getVoteById = async (req, res, next) => {
     const { id } = req.params;
 
     const vote = await prisma.vote.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
       include: {
         options: true,
       },
@@ -116,7 +116,7 @@ export const updateVote = async (req, res, next) => {
     const { title, description, image, isActive, endDate, isExpired, options } = req.body;
 
     let vote = await prisma.vote.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!vote) {
@@ -153,7 +153,7 @@ export const updateVote = async (req, res, next) => {
     }
 
     const updatedVote = await prisma.vote.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: updateData,
       include: {
         options: true,
@@ -175,7 +175,7 @@ export const deleteVote = async (req, res, next) => {
     const { id } = req.params;
 
     const vote = await prisma.vote.delete({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!vote) {
@@ -200,7 +200,7 @@ export const castVote = async (req, res, next) => {
     const { optionId } = req.body;
 
     const vote = await prisma.vote.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
       include: {
         options: true,
       },
@@ -227,7 +227,7 @@ export const castVote = async (req, res, next) => {
       });
     }
 
-    const option = vote.options.find(opt => opt.id === parseInt(optionId));
+    const option = vote.options.find(opt => opt.id === optionId);
     if (!option) {
       return res.status(400).json({
         success: false,
@@ -236,12 +236,12 @@ export const castVote = async (req, res, next) => {
     }
 
     const updatedOption = await prisma.voteOption.update({
-      where: { id: parseInt(optionId) },
+      where: { id: optionId },
       data: { votes: { increment: 1 } },
     });
 
     const updatedVote = await prisma.vote.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
       include: {
         options: true,
       },

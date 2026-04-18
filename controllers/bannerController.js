@@ -74,7 +74,7 @@ export const getBannerById = async (req, res, next) => {
     const { id } = req.params;
 
     const banner = await prisma.banner.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!banner) {
@@ -99,7 +99,7 @@ export const updateBanner = async (req, res, next) => {
     const { title, description, image, link, position, isActive, startDate, endDate } = req.body;
 
     let banner = await prisma.banner.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!banner) {
@@ -121,7 +121,7 @@ export const updateBanner = async (req, res, next) => {
     };
 
     const updatedBanner = await prisma.banner.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: updateData,
     });
 
@@ -140,7 +140,7 @@ export const deleteBanner = async (req, res, next) => {
     const { id } = req.params;
 
     const banner = await prisma.banner.delete({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!banner) {

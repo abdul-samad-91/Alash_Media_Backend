@@ -88,7 +88,7 @@ export const getGalleryById = async (req, res, next) => {
     const { id } = req.params;
 
     const gallery = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
       include: {
         items: {
           orderBy: { displayOrder: 'asc' },
@@ -125,7 +125,7 @@ export const updateGallery = async (req, res, next) => {
     }
 
     let gallery = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!gallery) {
@@ -138,7 +138,7 @@ export const updateGallery = async (req, res, next) => {
     // Delete old items if updating
     if (items) {
       await prisma.galleryItem.deleteMany({
-        where: { galleryId: parseInt(id) },
+        where: { galleryId: id },
       });
     }
 
@@ -163,7 +163,7 @@ export const updateGallery = async (req, res, next) => {
     }
 
     const updatedGallery = await prisma.gallery.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: updateData,
       include: {
         items: {
@@ -187,7 +187,7 @@ export const deleteGallery = async (req, res, next) => {
     const { id } = req.params;
 
     const gallery = await prisma.gallery.delete({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!gallery) {
@@ -212,7 +212,7 @@ export const addGalleryItem = async (req, res, next) => {
     const { title, url, thumbnail, description } = req.body;
 
     const gallery = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
       include: { items: true },
     });
 
@@ -230,12 +230,12 @@ export const addGalleryItem = async (req, res, next) => {
         thumbnail,
         description,
         displayOrder: gallery.items.length,
-        galleryId: parseInt(id),
+        galleryId: id,
       },
     });
 
     const updatedGallery = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
       include: {
         items: {
           orderBy: { displayOrder: 'asc' },
@@ -258,7 +258,7 @@ export const removeGalleryItem = async (req, res, next) => {
     const { id, itemId } = req.params;
 
     const gallery = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!gallery) {
@@ -269,11 +269,11 @@ export const removeGalleryItem = async (req, res, next) => {
     }
 
     await prisma.galleryItem.delete({
-      where: { id: parseInt(itemId) },
+      where: { id: itemId },
     });
 
     const updatedGallery = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
       include: {
         items: {
           orderBy: { displayOrder: 'asc' },
@@ -297,7 +297,7 @@ export const updateGalleryItem = async (req, res, next) => {
     const { title, url, thumbnail, description, displayOrder } = req.body;
 
     const gallery = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!gallery) {
@@ -308,10 +308,10 @@ export const updateGalleryItem = async (req, res, next) => {
     }
 
     const item = await prisma.galleryItem.findUnique({
-      where: { id: parseInt(itemId) },
+      where: { id: itemId },
     });
 
-    if (!item || item.galleryId !== parseInt(id)) {
+    if (!item || item.galleryId !== id) {
       return res.status(404).json({
         success: false,
         message: 'Item not found',
@@ -327,12 +327,12 @@ export const updateGalleryItem = async (req, res, next) => {
     };
 
     await prisma.galleryItem.update({
-      where: { id: parseInt(itemId) },
+      where: { id: itemId },
       data: updateData,
     });
 
     const updatedGallery = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
       include: {
         items: {
           orderBy: { displayOrder: 'asc' },

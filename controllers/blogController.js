@@ -69,6 +69,8 @@ export const createBlog = async (req, res, next) => {
       readTime,
     } = req.body;
 
+    // console.log('Creating blog with data:', req.body);
+
     // Generate slug
     const slug = generateSlug(title);
 
@@ -99,22 +101,20 @@ export const createBlog = async (req, res, next) => {
         status,
         readTime,
         publishedDate: status === 'published' ? new Date() : null,
-        authorId: parseInt(author),
-        categoryId: parseInt(category),
-        createdById: req.user?.id,
+        authorId: author,
+        categoryId: category,
+        createdById: req.user?.id ? String(req.user.id) : null,
         tags: {
           create: tags?.map(tag => ({ tag })) || [],
         },
         contentBlocks: {
-          create: contentBlocks?.map((block, index) => ({
-            blockId: block.id || index,
+          create: contentBlocks?.map((block) => ({
             heading: block.heading,
             text: block.text,
           })) || [],
         },
         sections: {
-          create: sections?.map((section, index) => ({
-            sectionId: section.id || index,
+          create: sections?.map((section) => ({
             heading: section.heading,
             text: section.text,
           })) || [],
@@ -158,8 +158,8 @@ export const getAllBlogs = async (req, res, next) => {
     const where = {};
     if (status) where.status = status;
     if (type || contentType) where.contentType = normalizeContentType(contentType || type);
-    if (category) where.categoryId = parseInt(category);
-    if (author) where.authorId = parseInt(author);
+    if (category) where.categoryId = category;
+    if (author) where.authorId = author;
     if (activeOnly === 'true') where.isActive = true;
 
     const pageNumber = parseInt(page);
@@ -217,17 +217,9 @@ export const getAllBlogs = async (req, res, next) => {
 export const getBlogById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const blogId = parseInt(id);
-
-    if (Number.isNaN(blogId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid blog id',
-      });
-    }
 
     const blog = await prisma.blog.findUnique({
-      where: { id: blogId },
+      where: { id },
       include: {
         author: true,
         category: true,
@@ -245,7 +237,7 @@ export const getBlogById = async (req, res, next) => {
     }
 
     await prisma.blog.update({
-      where: { id: blogId },
+      where: { id },
       data: { views: { increment: 1 } },
     });
 
@@ -316,7 +308,7 @@ export const updateBlog = async (req, res, next) => {
     } = req.body;
 
     let blog = await prisma.blog.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!blog) {
@@ -332,7 +324,7 @@ export const updateBlog = async (req, res, next) => {
       const existingBlog = await prisma.blog.findUnique({
         where: { slug: newSlug },
       });
-      if (existingBlog && existingBlog.id !== parseInt(id)) {
+      if (existingBlog && existingBlog.id !== id) {
         return res.status(400).json({
           success: false,
           message: 'Blog with this title already exists',
@@ -343,19 +335,19 @@ export const updateBlog = async (req, res, next) => {
     // Delete old relationships if updating
     if (tags) {
       await prisma.blogTag.deleteMany({
-        where: { blogId: parseInt(id) },
+        where: { blogId: id },
       });
     }
 
     if (contentBlocks) {
       await prisma.blogContentBlock.deleteMany({
-        where: { blogId: parseInt(id) },
+        where: { blogId: id },
       });
     }
 
     if (sections) {
       await prisma.blogSection.deleteMany({
-        where: { blogId: parseInt(id) },
+        where: { blogId: id },
       });
     }
 
@@ -377,8 +369,8 @@ export const updateBlog = async (req, res, next) => {
         status,
         publishedDate: status === 'published' && !blog.publishedDate ? new Date() : blog.publishedDate,
       }),
-      ...(author && { authorId: parseInt(author) }),
-      ...(category && { categoryId: parseInt(category) }),
+      ...(author && { authorId: author }),
+      ...(category && { categoryId: category }),
     };
 
     // Handle new relationships
@@ -390,8 +382,7 @@ export const updateBlog = async (req, res, next) => {
 
     if (contentBlocks) {
       updateData.contentBlocks = {
-        create: contentBlocks.map((block, index) => ({
-          blockId: block.id || index,
+        create: contentBlocks.map((block) => ({
           heading: block.heading,
           text: block.text,
         })),
@@ -400,8 +391,7 @@ export const updateBlog = async (req, res, next) => {
 
     if (sections) {
       updateData.sections = {
-        create: sections.map((section, index) => ({
-          sectionId: section.id || index,
+        create: sections.map((section) => ({
           heading: section.heading,
           text: section.text,
         })),
@@ -409,7 +399,7 @@ export const updateBlog = async (req, res, next) => {
     }
 
     const updatedBlog = await prisma.blog.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: updateData,
       include: {
         author: true,
@@ -435,8 +425,8 @@ export const deleteBlog = async (req, res, next) => {
     const { id } = req.params;
 
     const blog = await prisma.blog.delete({
-      where: { id: parseInt(id) },
-    });
+      where: { id },
+    })
 
     if (!blog) {
       return res.status(404).json({

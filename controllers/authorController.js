@@ -87,7 +87,7 @@ export const getAuthorById = async (req, res, next) => {
     const { page = 1, limit = 5 } = req.query;
 
     const author = await prisma.author.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!author) {
@@ -100,10 +100,10 @@ export const getAuthorById = async (req, res, next) => {
     // Get related blogs with pagination
     const startIndex = (page - 1) * limit;
     const totalBlogs = await prisma.blog.count({
-      where: { authorId: parseInt(id) },
+      where: { authorId: id },
     });
     const blogs = await prisma.blog.findMany({
-      where: { authorId: parseInt(id) },
+      where: { authorId: id },
       skip: startIndex,
       take: parseInt(limit),
       orderBy: { publishedDate: 'desc' },
@@ -183,17 +183,9 @@ export const updateAuthor = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name, photo, shortBio, isActive } = req.body;
-    const authorId = parseInt(id);
-
-    if (Number.isNaN(authorId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid author id',
-      });
-    }
 
     const author = await prisma.author.findUnique({
-      where: { id: authorId },
+      where: { id },
     });
 
     if (!author) {
@@ -210,7 +202,7 @@ export const updateAuthor = async (req, res, next) => {
       const existingAuthor = await prisma.author.findFirst({
         where: {
           slug: newSlug,
-          NOT: { id: authorId },
+          NOT: { id },
         },
       });
       if (existingAuthor) {
@@ -229,7 +221,7 @@ export const updateAuthor = async (req, res, next) => {
     if (isActive !== undefined) updateData.isActive = isActive;
 
     const updatedAuthor = await prisma.author.update({
-      where: { id: authorId },
+      where: { id },
       data: updateData,
     });
 
@@ -246,17 +238,9 @@ export const updateAuthor = async (req, res, next) => {
 export const deleteAuthor = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const authorId = parseInt(id);
-
-    if (Number.isNaN(authorId)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid author id',
-      });
-    }
 
     const author = await prisma.author.findUnique({
-      where: { id: authorId },
+      where: { id },
     });
 
     if (!author) {
@@ -267,7 +251,7 @@ export const deleteAuthor = async (req, res, next) => {
     }
 
     const relatedBlogsCount = await prisma.blog.count({
-      where: { authorId },
+      where: { authorId: id },
     });
 
     if (relatedBlogsCount > 0) {
@@ -278,7 +262,7 @@ export const deleteAuthor = async (req, res, next) => {
     }
 
     await prisma.author.delete({
-      where: { id: authorId },
+      where: { id },
     });
 
     res.status(200).json({
