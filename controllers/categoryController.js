@@ -4,7 +4,7 @@ import { generateSlug } from '../utils/helpers.js';
 export const createCategory = async (req, res, next) => {
   try {
     const { name, description, parentCategory, isActive } = req.body;
-
+    
     const slug = generateSlug(name);
 
     // Check if slug already exists
@@ -21,7 +21,7 @@ export const createCategory = async (req, res, next) => {
     // If parentCategory is provided, verify it exists
     if (parentCategory) {
       const parent = await prisma.category.findUnique({
-        where: { id: parentCategory },
+        where: { id: String(parentCategory) },
       });
       if (!parent) {
         return res.status(400).json({
@@ -36,7 +36,7 @@ export const createCategory = async (req, res, next) => {
         name,
         slug,
         description,
-        parentCategoryId: parentCategory || null,
+        parentCategoryId: parentCategory ? String(parentCategory) : null,
         isActive: isActive !== undefined ? isActive : true,
       },
       include: {
@@ -156,7 +156,8 @@ export const updateCategory = async (req, res, next) => {
 
     if (parentCategory !== undefined) {
       if (parentCategory) {
-        if (parentCategory === id) {
+        const parentCategoryStr = String(parentCategory);
+        if (parentCategoryStr === id) {
           return res.status(400).json({
             success: false,
             message: 'Category cannot be its own parent',
@@ -164,7 +165,7 @@ export const updateCategory = async (req, res, next) => {
         }
 
         const parent = await prisma.category.findUnique({
-          where: { id: parentCategory },
+          where: { id: parentCategoryStr },
         });
         if (!parent) {
           return res.status(400).json({
@@ -180,7 +181,7 @@ export const updateCategory = async (req, res, next) => {
       ...(description !== undefined && { description }),
       ...(isActive !== undefined && { isActive }),
       ...(parentCategory !== undefined && {
-        parentCategoryId: parentCategory || null,
+        parentCategoryId: parentCategory ? String(parentCategory) : null,
       }),
     };
 
