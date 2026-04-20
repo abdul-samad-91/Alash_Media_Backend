@@ -46,8 +46,8 @@ model Blog {
   subtitle         String?
   shortDescription String
   content          String             @db.LongText
-  mainContentOne   String?
-  mainContentTwo   String?
+  mainContentOne   String?            @db.LongText
+  mainContentTwo   String?            @db.LongText
   featuredImage    String
   imageCaption     String?
   status           String             @default("draft")
@@ -89,7 +89,7 @@ model BlogTag {
 model BlogContentBlock {
   id      String  @id @default(uuid())
   heading String?
-  text    String?
+  text    String? @db.LongText
   blogId  String
   blog    Blog    @relation(fields: [blogId], references: [id], onDelete: Cascade)
 
@@ -100,7 +100,7 @@ model BlogContentBlock {
 model BlogSection {
   id      String  @id @default(uuid())
   heading String?
-  text    String?
+  text    String? @db.LongText
   blogId  String
   blog    Blog    @relation(fields: [blogId], references: [id], onDelete: Cascade)
 
