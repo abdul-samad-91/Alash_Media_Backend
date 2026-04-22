@@ -26,9 +26,13 @@ await connectDB();
 
 // Middleware
 app.use(cors({
-  origin: true,
+  origin: [
+    "https://alash-media-admin.vercel.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   credentials: true
 }));
+app.options("*", cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
