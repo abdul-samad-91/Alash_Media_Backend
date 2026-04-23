@@ -3,12 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './config/database.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 // FIX for __dirname in ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -33,7 +29,8 @@ await connectDB();
 // Middleware
 app.use(cors({
   origin: [
-    "https://alash-media-admin.vercel.app"
+    "https://alash-media-admin.vercel.app",
+    "alash-media-five.vercel.app"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   credentials: true
@@ -41,15 +38,10 @@ app.use(cors({
 app.options("*", cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
 
-// Routes
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname , "public" , "index.html"));
-});
 
 // Basic route
-app.get('/api/health', (req , res) => {
+app.get('/', (req , res) => {
   res.json({
     success: true,
     message: 'Backend is running',
