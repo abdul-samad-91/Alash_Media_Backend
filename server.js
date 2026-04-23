@@ -36,6 +36,12 @@ app.options("*", cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+
+  app.get('/', (req, res) => {
+      // res.json({ message: 'Welcome to Apex Backend API' });
+      res.sendFile(path.join(__dirname , "public" , "index.html"));
+  });
+
 // Basic route
 app.get('/api/health', (req , res) => {
   res.json({
