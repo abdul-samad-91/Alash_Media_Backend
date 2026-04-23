@@ -15,4 +15,4 @@ build/
 .vscode/
 .idea/
 uploads/
-public/
+# public/
