@@ -30,7 +30,7 @@ await connectDB();
 app.use(cors({
   origin: [
     "https://alash-media-admin.vercel.app",
-    "alash-media-five.vercel.app"
+    "https://alash-media-five.vercel.app"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   credentials: true
