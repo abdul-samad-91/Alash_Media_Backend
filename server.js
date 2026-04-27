@@ -29,7 +29,7 @@ await connectDB();
 // Middleware
 app.use(cors({
   origin: [
-    "http://localhost:5173/",
+    "http://localhost:5173",
     "https://alash-media-admin.vercel.app",
     "https://alash-media-five.vercel.app"
   ],
